@@ -2,20 +2,32 @@ package xinghuangxu.leetcode;
 
 import java.util.HashMap;
 
+/*
+ * Design and implement a data structure for Least Recently Used (LRU) cache. It should support the following operations: get and set.
 
+get(key) - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.
+set(key, value) - Set or insert the value if the key is not already present. When the cache reached its capacity, it should invalidate the least recently used item before inserting a new item.
+ */
 public class LRUCache {
 
 	public static void main(String[] args) {
-		LRUCache lru=new LRUCache(3000);
-		for(int i=0;i<5000000;i++){
-			lru.set(i, i);
-		}
-		System.out.println("Done");
+		LRUCache lru=new LRUCache(1);
+//		for(int i=0;i<5000000;i++){
+//			lru.set(i, i);
+//		}
+//		System.out.println("Done");
+		lru.set(2,1);
+		lru.get(2);
+		lru.set(3, 2);
+		lru.get(2);
+		lru.get(3);
+		
 //		lru.set(2,1);
+//		lru.set(1,1);
 //		lru.get(2);
-//		lru.set(3, 2);
+//		lru.set(4, 1);
+//		lru.get(1);
 //		lru.get(2);
-//		lru.get(3);
 	}
 	
 	class Node{
@@ -43,8 +55,8 @@ public class LRUCache {
 	}
 
 	public int get(int key) {
-		if (map.containsKey(key)) {
-			Node temp=map.get(key);
+		Node temp=map.get(key);
+		if (temp!=null) {
 			removeNode(temp);
 			addNode(temp);
 			System.out.println(temp.val);
@@ -67,9 +79,10 @@ public class LRUCache {
 			if (current == capacity) {
 				removeListUsedItem();
 			}
-			current++;
 			temp=new Node(null,null,key,value);
 			addNode(temp);
+			map.put(key,temp);
+			current++;
 		}else{
 			removeNode(temp);
 			addNode(temp);
@@ -85,9 +98,11 @@ public class LRUCache {
 	}
 
 	private void removeNode(Node temp) {
-		temp.prev=temp.next;
+		temp.prev.next=temp.next;
 		if(temp.next!=null){
 			temp.next.prev=temp.prev;
+		}else{
+			tail=temp.prev; //reconnect the tail
 		}
 	}
 
