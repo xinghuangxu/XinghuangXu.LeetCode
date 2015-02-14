@@ -1,9 +1,7 @@
 package xinghuangxu.leetcode;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
+
 
 public class LRUCache {
 
@@ -38,8 +36,6 @@ public class LRUCache {
 	private int current = 0;
 	private Node head;
 	private Node tail;
-//	private Queue<Integer> queue=new LinkedList<Integer>();
-//	private HashMap<Integer, Integer> usage = new HashMap<Integer, Integer>();
 
 	public LRUCache(int capacity) {
 		this.capacity = capacity;
@@ -66,13 +62,19 @@ public class LRUCache {
 	}
 
 	public void set(int key, int value) {
-		if (!map.containsKey(key)&&current == capacity) {
-			removeListUsedItem();
+		Node temp=map.get(key);
+		if(temp==null){
+			if (current == capacity) {
+				removeListUsedItem();
+			}
+			current++;
+			temp=new Node(null,null,key,value);
+			addNode(temp);
+		}else{
+			removeNode(temp);
+			addNode(temp);
+			temp.val=value;
 		}
-		current++;
-		Node temp=new Node(null,null,key,value);
-		addNode(temp);
-		map.put(key, temp);
 	}
 
 	private void removeListUsedItem() {
