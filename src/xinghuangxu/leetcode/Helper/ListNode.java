@@ -14,4 +14,9 @@ public class ListNode {
 		temp.next=next;
 		next=temp;
 	}
+
+	public void add(ListNode temp) {
+		temp.next=next;
+		next=temp;
+	}
 }

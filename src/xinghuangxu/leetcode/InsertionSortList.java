@@ -1,19 +1,8 @@
 package xinghuangxu.leetcode;
 
-class ListNode {
-	int val;
-	ListNode next;
+import xinghuangxu.leetcode.Helper.ListNode;
 
-	ListNode(int x) {
-		val = x;
-		next = null;
-	}
 
-	public void add(ListNode listNode) {
-		listNode.next = this.next;
-		this.next = listNode;
-	}
-}
 
 public class InsertionSortList {
 
