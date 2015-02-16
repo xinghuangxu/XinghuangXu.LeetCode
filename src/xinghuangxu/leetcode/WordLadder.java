@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
@@ -25,58 +26,94 @@ public class WordLadder {
 		System.out.println("");
 	}
 	
-	class Node{
-		Node parent;
-		int depth;
+	class Node implements Comparable<Node>{
+		List<Node> parents=new LinkedList<Node>();
+		HashSet<Node> neighbors=new HashSet<Node>();
+		int dist;
 		String val;
-		public Node(Node parent,int depth,String val){
-			this.parent=parent;
-			this.depth=depth;
+		public Node(String val){
 			this.val=val;
+			this.dist=Integer.MAX_VALUE;
 		}
+		@Override
+		public int compareTo(Node o) {
+			if(this.dist>o.dist){
+				return 1;
+			}else if (this.dist==o.dist){
+				return 0;
+			}
+			return -1;
+		}
+		
 	}
 	public List<List<String>> findLadders(String start, String end,
 			Set<String> dict) {
-		List<List<String>> rel=new ArrayList<List<String>>();
-		int maxDepth=this.ladderLength(start, end, dict);
+		//get all the nodes
+		Node startNode=new Node(start);
+		startNode.dist=1;
+		Node endNode=new Node(end);
+		List<Node> allNode=new ArrayList<Node>();
+		allNode.add(startNode);
+		allNode.add(endNode);
+		for(String w:dict){
+			allNode.add(new Node(w));
+		}
 		
-		Queue<Node> queue = new ArrayDeque<Node>();
-		queue.add(new Node(null,1,start));
-		Node wordNode, newWordNode;
-		String word,newWord;
-		int N = start.length();
-		char newChar;
-		while (!queue.isEmpty()) {
-			wordNode = queue.poll();
-			word=wordNode.val;
-			if(wordNode.depth>=maxDepth)break;
-			for (int i = 0; i < N; i++) {
-				for (int j = 0; j < 26; j++) {
-					newChar = (char) ('a' + j);
-					newWord = word.substring(0, i) + newChar
-							+ word.substring(i + 1);
-					if (dict.contains(newWord)) {
-						newWordNode=new Node(wordNode,wordNode.depth+1,newWord);
-						if (newWord.equals(end)) {
-							rel.add(createList(newWordNode));
-						}else{
-							queue.add(newWordNode);
-						}
-						
+		//construct the edges
+		HashSet<Node> neighbors;
+		String word1,word2;
+		int diff;
+		for(int i=0;i<allNode.size();i++){
+			neighbors=allNode.get(i).neighbors;
+			word1=allNode.get(i).val;
+			for(int j=i+1;j<allNode.size();j++){
+				diff=0;word2=allNode.get(j).val;
+				for(int k=0;k<word1.length();k++){
+					if(word1.charAt(k)!=word2.charAt(k)){
+						diff++;
+						if(diff>1)break;
 					}
+				}
+				if(diff==1){
+					neighbors.add(allNode.get(j));
+					allNode.get(j).neighbors.add(allNode.get(i));
 				}
 			}
 		}
-		return rel;
+		
+		//union search
+		PriorityQueue<Node> pq=new PriorityQueue<Node>();
+		pq.add(startNode);
+		Node temp;
+		while(!pq.isEmpty()){
+			temp=pq.poll();
+			if(temp==endNode)break;
+			for(Node v:temp.neighbors){
+				if(temp.dist+1<=v.dist){
+					v.parents.add(temp);
+					v.dist=temp.dist+1;
+					pq.remove(v);
+					pq.add(v);
+				}
+			}
+		}
+		List<List<String>> seqs=new LinkedList<List<String>>();
+		List<String> seq=new LinkedList<String>();
+		createList(startNode,endNode,seq,seqs);
+		return seqs;
 	}
 
-	private List<String> createList(Node node) {
-		List<String> rel=new LinkedList<String>();
-		while(node!=null){
-			rel.add(0,node.val);
-			node=node.parent;
+	private void createList(Node start,Node end, List<String> seq,List<List<String>> seqs) {
+		seq.add(0,end.val);
+		if(start==end){
+			List<String> clone=new ArrayList<String>(seq);
+			seqs.add(clone);
+		}else{
+			for(Node n:end.parents){
+				createList(start,n,seq,seqs);
+			}
 		}
-		return rel;
+		seq.remove(0);
 	}
 
 
