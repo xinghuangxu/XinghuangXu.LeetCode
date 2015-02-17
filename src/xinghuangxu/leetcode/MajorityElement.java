@@ -1,3 +1,4 @@
+package xinghuangxu.leetcode;
 
 public class MajorityElement {
 
