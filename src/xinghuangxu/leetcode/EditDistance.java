@@ -4,7 +4,7 @@ public class EditDistance {
 
 	public static void main(String[] args) {
 		EditDistance ed=new EditDistance();
-		System.out.println(ed.minDistance("trials", ""));
+		System.out.println(ed.minDistance("trials", "Zeil"));
 	}
 
 	public int minDistance(String word1, String word2) {
