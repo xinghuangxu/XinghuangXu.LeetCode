@@ -6,8 +6,7 @@ import java.util.List;
 public class SudokuSolver {
 
 	public static void main(String[] args) {
-		char[][] board = { 
-				{ '5', '3', '.', '.', '7', '.', '.', '.', '.' },
+		char[][] board = { { '5', '3', '.', '.', '7', '.', '.', '.', '.' },
 				{ '6', '.', '.', '1', '9', '5', '.', '.', '.' },
 				{ '.', '9', '8', '.', '.', '.', '.', '6', '.' },
 				{ '8', '.', '.', '.', '6', '.', '.', '.', '3' },
@@ -17,7 +16,8 @@ public class SudokuSolver {
 				{ '.', '.', '.', '4', '1', '9', '.', '.', '5' },
 				{ '.', '.', '.', '.', '8', '.', '.', '7', '9' } };
 		SudokuSolver ss = new SudokuSolver();
-		ss.solveSudoku(board);
+//		ss.solveSudoku(board);
+		System.out.println(ss.isValidSudoku(board));
 	}
 
 	int N = 9;
@@ -39,7 +39,8 @@ public class SudokuSolver {
 	}
 
 	class Node {
-		int i, j,val;
+		int i, j, val;
+
 		Node(int i, int j) {
 			this.i = i;
 			this.j = j;
@@ -114,16 +115,68 @@ public class SudokuSolver {
 			blocks[i].preprocess();
 		}
 		if (SearchForSolution(0, blocks, rows, columns)) {
-			for(int i=0;i<allNode.size();i++){
-				temp=allNode.get(i);
-				board[temp.i][temp.j]=(char) (temp.val+'1');
+			for (int i = 0; i < allNode.size(); i++) {
+				temp = allNode.get(i);
+				board[temp.i][temp.j] = (char) (temp.val + '1');
 			}
 		}
 	}
 
+	public boolean isValidSudoku(char[][] board) {
+		boolean[][] rows = new boolean[N][N];
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (board[i][j] != '.') {
+					if (board[i][j] != '.'){
+						if(rows[i][board[i][j] - '1']){
+							return false;
+						}else{
+							rows[i][board[i][j] - '1']=true;
+						}
+					}
+				}
+			}
+		}
+		rows=null;
+		boolean[][] columns = new boolean[N][N];
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (board[j][i] != '.') {
+					if (board[j][i] != '.'){
+						if(columns[i][board[j][i] - '1']){
+							return false;
+						}else{
+							columns[i][board[j][i] - '1']=true;
+						}
+					}
+				}
+			}
+		}
+		columns=null;
+		int BlockSize = 3;
+		boolean[][] blocks = new boolean[N][N];
+		for (int i = 0; i < N; i = i + 3) {
+			for (int j = 0; j < N; j = j + 3) {
+				for (int m = i; m < i + BlockSize; m++) {
+					for (int n = j; n < j + BlockSize; n++) {
+						if (board[m][n] != '.') {
+							if(blocks[3 * (i / 3) + j / 3][board[m][n] - '1']){
+								return false;
+							}else{
+								blocks[3 * (i / 3) + j / 3][board[m][n] - '1']=true;
+							}
+						}
+					}
+				}
+			}
+		}
+		blocks=null;
+		return true;
+	}
+
 	private boolean SearchForSolution(int loc, Block[] blocks, Line[] rows,
 			Line[] columns) {
-		
+
 		if (loc == 9)
 			return true;
 		List<Node> freeNodes = blocks[loc].freeNodes;
@@ -134,7 +187,7 @@ public class SudokuSolver {
 			Node tNode = freeNodes.get(j);
 			if (rows[tNode.i].isUnused(tNum) && columns[tNode.j].isUnused(tNum)) {
 				// put that number on that block,row and column
-				tNode.val=tNum;
+				tNode.val = tNum;
 				freeNodes.remove(j);
 				rows[tNode.i].use(tNum);
 				columns[tNode.j].use(tNum);
