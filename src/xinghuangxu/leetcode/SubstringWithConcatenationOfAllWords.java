@@ -2,14 +2,17 @@ package xinghuangxu.leetcode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class SubstringWithConcatenationOfAllWords {
 
 	public static void main(String[] args) {
 		SubstringWithConcatenationOfAllWords caw = new SubstringWithConcatenationOfAllWords();
-		String S = "aaa";
-		String[] L = { "a", "a"};
+		String S = "aaaaaaaa";
+		String[] L = { "aa", "aa", "aa" };
 		List<Integer> rel = caw.findSubstring(S, L);
 		for (Integer i : rel) {
 			System.out.println(i);
@@ -21,7 +24,7 @@ public class SubstringWithConcatenationOfAllWords {
 		int N = L[0].length();
 		if (S.length() < L.length * N)
 			return rel;
-		HashMap<String, Integer> origin = new HashMap<String, Integer>(),map;
+		HashMap<String, Integer> origin = new HashMap<String, Integer>(), map = new HashMap<String, Integer>();
 		for (int i = 0; i < L.length; i++) {
 			Integer temp = origin.get(L[i]);
 			if (temp == null) {
@@ -29,41 +32,54 @@ public class SubstringWithConcatenationOfAllWords {
 			} else {
 				origin.put(L[i], temp + 1);
 			}
+			map.put(L[i], 0);
 		}
-		int total;
+
 		for (int i = 0; i < N; i++) {
-			Integer left = null, right = i;
-			total = L.length;
-			map=new HashMap<String,Integer>(origin);
-			while (right + N <= S.length()) {
-				String temp = S.substring(right, right + N);
-				if (map.containsKey(temp)) {
-					if (map.get(temp) > 0) {//found
-						if(left==null){
-							left=right;
+			Integer left = i, total = 0;
+			Iterator<Entry<String, Integer>> it = map.entrySet()
+					.iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, Integer> pair = (Map.Entry<String, Integer>) it
+						.next();
+				map.put(pair.getKey(), 0);
+			}
+			for (int j = i; j + N <= S.length(); j = j + N) {
+				String temp = S.substring(j, j + N);
+				if (origin.containsKey(temp)) {
+					map.put(temp, map.get(temp) + 1);
+					if (map.get(temp) <= origin.get(temp)) {
+						total++;
+					} else {
+						while (map.get(temp) > origin.get(temp)) {
+							String str1 = S.substring(left, left + N);
+							map.put(str1, map.get(str1) - 1);
+							if (map.get(str1) < origin.get(str1)) {
+								total--;
+							}
+							left = left + N;
 						}
-						map.put(temp, map.get(temp) - 1);
-						total--;
-						if(total==0){
-							rel.add(left);
-						}
-					} else if (left != null && S.substring(left,left+N).equals(temp)) { //shrink the window
-						left = left + N;
-						if(total==0){
-							rel.add(left);
-						}
-					}else{ //already has one, go back in time
-						left=null;
-						map=new HashMap<String,Integer>(origin);
-						total = L.length;
-						right=right-N;
 					}
-				}else {
-					left=null;
-					map=new HashMap<String,Integer>(origin);
-					total = L.length;
+					if (total == L.length) {
+						rel.add(left);
+						String str = S.substring(left, left + N);
+						map.put(str, map.get(str) - 1);
+						left += N;
+						total--;
+					}
+				} else {
+					// reset when the word doesn't exist in the List
+					left = j + N;
+					// reset the map
+					it = map.entrySet()
+							.iterator();
+					while (it.hasNext()) {
+						Map.Entry<String, Integer> pair = (Map.Entry<String, Integer>) it
+								.next();
+						map.put(pair.getKey(), 0);
+					}
+					total = 0;
 				}
-				right = right + N;
 			}
 		}
 		return rel;
